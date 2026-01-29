@@ -1,0 +1,47 @@
+---
+const { class: className, ...rest } = Astro.props;
+---
+
+<div class="group relative my-6 flex flex-col">
+  <div class="flex items-center justify-between border border-b-0 border-[var(--color-border)] bg-[var(--color-bg-secondary)] px-4 py-2" style="border-radius: var(--radius-md) var(--radius-md) 0 0">
+    <span class="text-xs font-mono text-[var(--color-text-tertiary)]">
+      {rest['data-language'] ?? ''}
+    </span>
+    <button
+      class="copy-btn min-h-[44px] min-w-[44px] inline-flex items-center justify-center text-[var(--color-text-tertiary)] opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 hover:text-[var(--color-text)] cursor-pointer focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)] outline-none"
+      style="border-radius: var(--radius-sm)"
+      aria-label="Copy code"
+    >
+      <svg class="copy-icon size-4" aria-hidden="true" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z" />
+        <path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z" />
+      </svg>
+      <svg class="check-icon hidden size-4 text-green-500" aria-hidden="true" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z" />
+      </svg>
+    </button>
+  </div><pre {...rest} class:list={[className, 'mt-0 border border-[var(--color-border)]']} style="border-radius: 0 0 var(--radius-md) var(--radius-md)"><slot /></pre>
+</div>
+
+<script>
+  function initCopyButtons() {
+    document.querySelectorAll('.copy-btn').forEach((btn) => {
+      if ((btn as HTMLElement).dataset.copyInit) return;
+      (btn as HTMLElement).dataset.copyInit = '1';
+      btn.addEventListener('click', async () => {
+        const code = btn.closest('.group')?.querySelector('code')?.textContent ?? '';
+        await navigator.clipboard.writeText(code);
+        const copyIcon = btn.querySelector('.copy-icon');
+        const checkIcon = btn.querySelector('.check-icon');
+        copyIcon?.classList.add('hidden');
+        checkIcon?.classList.remove('hidden');
+        setTimeout(() => {
+          copyIcon?.classList.remove('hidden');
+          checkIcon?.classList.add('hidden');
+        }, 2000);
+      });
+    });
+  }
+
+  document.addEventListener('astro:page-load', initCopyButtons);
+</script>

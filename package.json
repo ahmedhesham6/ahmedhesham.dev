@@ -1,7 +1,10 @@
 {
-  "name": "new.ahmedhesham.dev",
+  "name": "ahmedhesham.dev",
   "type": "module",
-  "version": "0.0.1",
+  "version": "1.0.0",
+  "description": "Personal website and blog of Ahmed Hesham — AI Engineer",
+  "author": "Ahmed Hesham <ahmadheshamabdelkader@gmail.com>",
+  "license": "MIT",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
@@ -9,6 +12,14 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^5.16.16"
+    "@astrojs/mdx": "^4.3.13",
+    "@astrojs/rss": "^4.0.15",
+    "@astrojs/sitemap": "^3.7.0",
+    "@shikijs/transformers": "^3.21.0",
+    "@tailwindcss/typography": "^0.5.19",
+    "@tailwindcss/vite": "^4.1.18",
+    "astro": "^5.16.16",
+    "reading-time": "^1.5.0",
+    "tailwindcss": "^4.1.18"
   }
 }

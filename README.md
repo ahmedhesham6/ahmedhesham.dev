@@ -1,43 +1,59 @@
-# Astro Starter Kit: Minimal
+# ahmedhesham.dev
 
-```sh
-npm create astro@latest -- --template minimal
+Personal website and blog — built with Astro, Tailwind CSS, and MDX.
+
+## Stack
+
+- **Framework**: [Astro v5](https://astro.build) with Content Collections and View Transitions
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com) with the typography plugin
+- **Content**: MDX with Zod-validated frontmatter
+- **Code Highlighting**: Shiki with multi-theme support (8 themes)
+- **Package Manager**: pnpm
+
+## Features
+
+- **9 themes** — Paper, Dawn, Sakura (light) and Night, Midnight, Ember, Cosmos, Forest, Noir (dark). Each with unique fonts, colors, border radii, shadows, background patterns, and code highlighting.
+- **Multi-blob aurora hero** — Stripe-inspired animated mesh gradient with per-theme color blobs
+- **Sticky sidebar TOC** — Active heading tracking on desktop, collapsible inline on mobile
+- **Reading progress bar** — Gradient accent bar at the top of blog posts
+- **Reactions** — Per-post reaction system with SVG icons
+- **GitHub pinned repos** — Fetched via GraphQL (requires `GITHUB_TOKEN`)
+- **Scroll reveal animations** — IntersectionObserver-based entrance animations
+- **RSS feed** and **sitemap** auto-generated
+
+## Getting Started
+
+```bash
+pnpm install
+pnpm dev
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Commands
 
-## 🚀 Project Structure
+| Command         | Action                                      |
+| :-------------- | :------------------------------------------ |
+| `pnpm dev`      | Start dev server at `localhost:4321`         |
+| `pnpm build`    | Build production site to `./dist/`           |
+| `pnpm preview`  | Preview the build locally before deploying   |
 
-Inside of your Astro project, you'll see the following folders and files:
+## Environment Variables
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+| Variable       | Description                          | Required |
+| :------------- | :----------------------------------- | :------- |
+| `GITHUB_TOKEN` | GitHub PAT for pinned repos GraphQL  | Optional |
+
+## Project Structure
+
+```
+src/
+├── components/       # Astro components (Header, Hero, ThemePicker, etc.)
+├── data/blog/        # MDX blog posts
+├── layouts/          # BaseLayout, BlogPostLayout, PageLayout
+├── lib/              # Utilities (GitHub API)
+├── pages/            # Routes (index, blog, tags, 404, RSS)
+└── styles/           # global.css (themes, patterns, animations)
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## License
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+MIT

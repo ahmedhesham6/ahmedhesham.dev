@@ -1,0 +1,24 @@
+---
+import Nav from './Nav.astro';
+import ThemePicker from './ThemePicker.astro';
+---
+
+<header class="header-fade sticky top-0 z-50 w-full" style="padding-top: env(safe-area-inset-top, 0px)">
+  <div class="px-4 pt-3 pb-2">
+    <div
+      class="mx-auto flex h-12 max-w-3xl items-center justify-between border border-[var(--color-border)] bg-[var(--color-bg)]/80 px-5 backdrop-blur-xl"
+      style="border-radius: var(--radius-lg); box-shadow: var(--shadow-card)"
+    >
+      <a
+        href="/"
+        class="text-sm font-semibold tracking-tight transition-colors duration-200 hover:text-[var(--color-accent-500)]"
+      >
+        ahmedhesham.dev
+      </a>
+      <div class="flex items-center gap-4">
+        <Nav />
+        <ThemePicker />
+      </div>
+    </div>
+  </div>
+</header>

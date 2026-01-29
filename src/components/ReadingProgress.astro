@@ -1,0 +1,26 @@
+---
+// Thin reading progress bar at the top of the page.
+// Uses the gradient accent color of the current theme.
+---
+
+<div class="reading-progress" id="reading-progress" aria-hidden="true"></div>
+
+<script>
+  function initProgress() {
+    const bar = document.getElementById('reading-progress');
+    if (!bar) return;
+
+    function update() {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      bar.style.width = `${Math.min(progress, 100)}%`;
+    }
+
+    window.addEventListener('scroll', update, { passive: true });
+    update();
+  }
+
+  initProgress();
+  document.addEventListener('astro:after-swap', initProgress);
+</script>

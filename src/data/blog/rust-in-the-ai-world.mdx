@@ -1,0 +1,80 @@
+---
+title: 'Rust in the AI World: My Honest Takes'
+description: 'What it is actually like to learn and ship Rust while building an AI agent — from a TypeScript engineer who cannot go back.'
+pubDate: 2026-01-29
+tags: ['rust', 'ai', 'developer-experience', 'agents']
+---
+
+A bit about me: I'm a Founding Engineer building [Stakpak](https://stakpak.dev), a DevOps AI agent, in Rust. I've been deep in the AI tooling space for the past few years — watching everything evolve from GitHub Copilot to Cursor to Claude Code, and now building and using our own agent daily.
+
+I was both blessed and cursed learning Rust in the middle of all this. It was challenging, but I shipped real value while still not understanding everything end to end. I learned by doing, under pressure, with deadlines. Here are my honest takes.
+
+## I Fucking Love Rust
+
+I won't sugarcoat it. I love Rust. It is not easy — not even close — but once you're in, there is no going back.
+
+I came from TypeScript. The syntax felt familiar enough to get started, but the real shift was mental. All that cognitive overhead I used to carry around — worrying about nulls slipping through, runtime type mismatches, subtle concurrency bugs — Rust just took it off my plate. The compiler handles it. The consistency and reliability I get in return is something I never had before.
+
+It's like going from hoping your code works to *knowing* it works.
+
+## If It Builds, It Will 95% Work
+
+This is the single most important thing I've learned.
+
+If the Rust compiler accepts your code, it will work 95% of the time. The remaining 5% is almost always a logic problem — you misunderstood the requirements, or the design was wrong. It's never "oh, I forgot to handle null" or "this field was supposed to be a number."
+
+The challenge was always getting it to compile in the first place. But here's the thing: that challenge is shrinking fast. With Opus 4.5 one-shotting complex Rust code, the compile barrier is dissolving. The problem has fully shifted from *can I write this* to *should I build this* and *how should I design it*.
+
+That shift changed my entire role. I'm not just a software engineer anymore. I'm a product engineer, an architect, a designer. I wear all the hats now because I'm no longer consumed by execution. I'm free to focus on the problems that actually matter.
+
+## My Day-to-Day Work
+
+Let me walk you through what my actual work looks like, because it's probably not what you'd expect.
+
+My day-to-day is not software engineering. It's product engineering:
+
+- Finding deficiencies in our product
+- Engineering better developer experiences
+- Designing features end to end before writing a single line of code
+
+**Step one** is always finding the right thing to build — a new feature, a better experience, or fixing something that feels off. Then I plan the hell out of it. I open Stakpak and run multiple rounds of investigation: exploring different approaches, pulling in the current codebase for context, and having the agent draft a detailed RFC covering both the product vision and every technical change needed.
+
+Some features need multiple RFCs. But here is where the magic kicks in.
+
+**After a few rounds** of discussion with the team — debating product implications, refining engineering details — the execution becomes the easiest part. You open an agent, whether it's running autonomously or you're controlling the loop.
+
+For some features I prefer staying in the loop. I like to interact mid-implementation, guiding decisions and refining details as they emerge. Maybe it's just for the vibes — to feel like I'm still a software engineer — but honestly, that need fades a little more each day.
+
+**The agent drives the plan.** After reviewing it a couple of times and fixing edge cases together, I have it start by implementing the test cases (when applicable). It uses the RFC as reference and the plan to track progress.
+
+Then Rust's toolchain does the rest. The compiler catches everything structural. `clippy` suggests optimizations. `rustfmt` keeps the code clean. I'm not burning cycles on syntax or formatting — I'm reviewing logical flow, checking if it fits the requirements, and testing edge cases.
+
+A few rounds of that, and the feature is ready to ship.
+
+If it compiles, 95% of the time it works. All the planning and RFC work is to push that remaining 5% to zero.
+
+## I Enjoy Coding with AI Agents (Even Though I Feel Rusty)
+
+I genuinely enjoy this workflow. And yes — I feel rusty (pun very much intended) from not hand-writing code the way I used to. Some days I can't remember syntax I used daily a year ago.
+
+But I don't miss it. I've traded mechanical recall for higher-leverage thinking. I design more. I plan more. I catch problems earlier. The code I ship is better than what I wrote alone, because I'm spending my energy on the right layer of the stack.
+
+## Will AI Replace Software Engineers?
+
+Hopefully yes. But not the way most people fear.
+
+If taking on more responsibility — thinking about higher-level problems, system design, user experience — while offloading syntax and boilerplate to an agent feels like "replacement," then sure. I've been replaced. And I'm more productive than I've ever been.
+
+Here's how I think about it: if AI becomes the new assembly language — something we build on top of rather than write directly — then we're witnessing a genuine step forward in the evolution of software development. Not a replacement of human engineers, but an amplification. The creativity, the intuition, the ability to understand *what to build and why* — that's still entirely human.
+
+The engineers who learn to leverage that will build things that were previously impossible. Not because they write more code, but because they think at a higher level.
+
+## The Future
+
+I don't know what happens next. Nobody does. The pace of change is unlike anything I've experienced in my career. Models get better every few months. Tooling evolves every few weeks. What felt cutting-edge six months ago feels quaint today.
+
+But one thing I'm certain of: AI is not a fad in software development. It's the foundation. And the engineers who embrace it — who learn to think with it rather than compete against it — will define what comes next.
+
+I'm excited to be building in this space. And I'm writing this to share what I'm learning along the way.
+
+If you're on a similar journey, I'd love to hear your takes — hit me up on [X](https://x.com/AhmedEtcho) or [LinkedIn](https://www.linkedin.com/in/ahmedhesham6/).

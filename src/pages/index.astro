@@ -1,17 +1,48 @@
 ---
+import PageLayout from '@layouts/PageLayout.astro';
+import Hero from '@components/Hero.astro';
+import BlogPostCard from '@components/BlogPostCard.astro';
+import PinnedRepos from '@components/PinnedRepos.astro';
+import { getCollection } from 'astro:content';
+import { fetchPinnedRepos } from '@lib/github';
+import { SITE_TITLE, SITE_DESCRIPTION } from '@/consts';
 
+const posts = (await getCollection('blog'))
+  .filter((post) => !post.data.draft)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, 5);
+
+const pinnedRepos = await fetchPinnedRepos();
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<PageLayout title={SITE_TITLE} description={SITE_DESCRIPTION}>
+  <div class="reveal">
+    <Hero />
+  </div>
+
+  <div class="reveal" data-delay="100">
+    <PinnedRepos repos={pinnedRepos} />
+  </div>
+
+  <section class="reveal mt-16" data-delay="200">
+    <h2 class="text-lg font-medium text-balance">Recent Writing</h2>
+    <div class="mt-6 flex flex-col gap-2">
+      {posts.map((post, i) => (
+        <div class="reveal" data-delay={String(100 + i * 50)}>
+          <BlogPostCard post={post} />
+        </div>
+      ))}
+    </div>
+    <a
+      href="/blog"
+      class="group mt-8 inline-flex items-center gap-1.5 text-sm text-[var(--color-text-secondary)] transition-colors duration-200 hover:text-[var(--color-text)]"
+    >
+      View all posts
+      <svg class="size-4 transition-transform duration-200 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+      </svg>
+    </a>
+  </section>
+
+
+</PageLayout>

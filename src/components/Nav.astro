@@ -1,0 +1,45 @@
+---
+const links = [
+  { href: '/blog', label: 'Blog' },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<nav aria-label="Main navigation" class="flex items-center gap-6">
+  {links.map((link) => {
+    const isActive = currentPath.startsWith(link.href);
+    return (
+      <a
+        href={link.href}
+        class:list={[
+          'nav-link relative text-sm transition-colors',
+          isActive
+            ? 'text-[var(--color-text)] font-medium'
+            : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)]',
+        ]}
+        aria-current={isActive ? 'page' : undefined}
+        data-active={isActive ? '' : undefined}
+      >
+        {link.label}
+      </a>
+    );
+  })}
+</nav>
+
+<style>
+  .nav-link {
+    text-decoration: none;
+    background-image: linear-gradient(var(--color-accent-500, currentColor), var(--color-accent-500, currentColor));
+    background-size: 0% 2px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.3s ease, color 0.2s ease;
+    padding-bottom: 2px;
+  }
+
+  .nav-link:hover,
+  .nav-link[data-active] {
+    background-size: 100% 2px;
+  }
+</style>

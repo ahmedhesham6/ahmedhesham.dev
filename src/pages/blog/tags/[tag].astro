@@ -1,0 +1,37 @@
+---
+import { getCollection } from 'astro:content';
+import PageLayout from '@layouts/PageLayout.astro';
+import BlogPostCard from '@components/BlogPostCard.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  const tags = [...new Set(posts.flatMap((post) => post.data.tags ?? []))];
+  return tags.map((tag) => ({
+    params: { tag },
+    props: {
+      posts: posts
+        .filter((post) => !post.data.draft && post.data.tags?.includes(tag))
+        .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()),
+    },
+  }));
+}
+
+const { tag } = Astro.params;
+const { posts } = Astro.props;
+---
+
+<PageLayout title={`Posts tagged \u201C${tag}\u201D`} description={`All posts tagged with ${tag}`}>
+  <a
+    href="/blog"
+    class="text-sm text-[var(--color-text-secondary)] transition-colors hover:text-[var(--color-text)]"
+  >
+    &larr; All posts
+  </a>
+  <h1 class="mt-4 text-3xl font-bold text-balance">
+    Posts Tagged &ldquo;{tag}&rdquo;
+  </h1>
+
+  <div class="mt-10 flex flex-col gap-2">
+    {posts.map((post) => <BlogPostCard post={post} />)}
+  </div>
+</PageLayout>

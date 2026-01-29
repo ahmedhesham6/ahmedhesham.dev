@@ -1,0 +1,190 @@
+---
+interface Props {
+  headings: { depth: number; slug: string; text: string }[];
+  variant?: 'sidebar' | 'inline';
+}
+
+const { headings, variant = 'inline' } = Astro.props;
+const filtered = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
+const isSidebar = variant === 'sidebar';
+---
+
+{filtered.length > 0 && isSidebar && (
+  <!-- ========== SIDEBAR VARIANT (sticky right side, desktop) ========== -->
+  <nav class="sticky top-24 pt-8" aria-label="Table of contents">
+    <p class="mb-4 text-[10px] font-semibold uppercase tracking-widest text-[var(--color-text-tertiary)]">
+      On this page
+    </p>
+
+    <div class="relative">
+      {/* Vertical track */}
+      <div class="absolute left-0 top-0 bottom-0 w-px bg-[var(--color-border)]" aria-hidden="true" />
+
+      {/* Active gradient indicator */}
+      <div
+        id="toc-indicator"
+        class="absolute left-0 w-0.5 transition-all duration-300 ease-out"
+        style="background: var(--gradient-accent); border-radius: 1px; top: 0; height: 0; opacity: 0"
+        aria-hidden="true"
+      />
+
+      <ul class="relative flex flex-col">
+        {filtered.map((heading) => (
+          <li>
+            <a
+              href={`#${heading.slug}`}
+              data-toc-link
+              data-slug={heading.slug}
+              data-depth={heading.depth}
+              class:list={[
+                'toc-link block border-l-2 border-transparent py-1.5 text-[13px] leading-snug text-[var(--color-text-tertiary)] transition-all duration-200 hover:text-[var(--color-text-secondary)]',
+                heading.depth === 3 ? 'pl-6' : 'pl-4',
+              ]}
+            >
+              {heading.text}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </nav>
+)}
+
+{filtered.length > 0 && !isSidebar && (
+  <!-- ========== INLINE VARIANT (collapsible, mobile/tablet) ========== -->
+  <details class="toc-inline group/toc mb-10 border border-[var(--color-border)] bg-[var(--color-bg-secondary)]/50 open:pb-4" style="border-radius: var(--radius-lg); box-shadow: var(--shadow-card)">
+    {/* Gradient top edge */}
+    <div class="absolute top-0 left-0 right-0 h-px" style="background: var(--gradient-accent)" aria-hidden="true" />
+
+    <summary class="flex cursor-pointer items-center gap-2 px-5 py-4 text-xs font-semibold uppercase tracking-widest text-[var(--color-text-tertiary)] select-none list-none [&::-webkit-details-marker]:hidden">
+      <svg
+        class="size-4 text-[var(--color-accent-500)] transition-transform duration-200 group-open/toc:rotate-90"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        aria-hidden="true"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+      </svg>
+      On this page
+      <span class="ml-auto text-[10px] font-normal normal-case tracking-normal text-[var(--color-text-tertiary)]">
+        {filtered.length} sections
+      </span>
+    </summary>
+
+    <nav aria-label="Table of contents" class="relative px-5">
+      <div class="relative pl-4">
+        {/* Track line */}
+        <div class="absolute left-0 top-0 bottom-0 w-px bg-[var(--color-border)]" aria-hidden="true" />
+
+        <ul class="flex flex-col">
+          {filtered.map((heading) => (
+            <li>
+              <a
+                href={`#${heading.slug}`}
+                data-toc-link
+                data-slug={heading.slug}
+                data-depth={heading.depth}
+                class:list={[
+                  'toc-link block py-1.5 text-sm text-[var(--color-text-secondary)] transition-colors duration-200 hover:text-[var(--color-text)]',
+                  heading.depth === 3 ? 'pl-4' : '',
+                ]}
+              >
+                {heading.text}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </nav>
+  </details>
+)}
+
+<style>
+  /* Sidebar: active link */
+  .toc-link.is-active {
+    color: var(--color-text);
+    font-weight: 500;
+    border-left-color: transparent;
+  }
+</style>
+
+<script>
+  function initToc() {
+    const links = document.querySelectorAll('[data-toc-link]');
+    const indicator = document.getElementById('toc-indicator');
+    if (!links.length) return;
+
+    const slugs = [...new Set([...links].map((l) => (l as HTMLElement).dataset.slug!))];
+
+    function setActive(slug: string) {
+      links.forEach((link) => {
+        const el = link as HTMLElement;
+        el.classList.toggle('is-active', el.dataset.slug === slug);
+      });
+
+      // Move the gradient indicator (sidebar only)
+      if (indicator) {
+        // Find the sidebar link (first match)
+        const activeLink = document.querySelector(
+          `[data-toc-link][data-slug="${slug}"]`
+        ) as HTMLElement | null;
+
+        if (activeLink && indicator.parentElement) {
+          const container = indicator.parentElement;
+          const containerRect = container.getBoundingClientRect();
+          const linkRect = activeLink.getBoundingClientRect();
+          const top = linkRect.top - containerRect.top;
+          indicator.style.top = `${top}px`;
+          indicator.style.height = `${linkRect.height}px`;
+          indicator.style.opacity = '1';
+        }
+      }
+    }
+
+    // Observe headings
+    const headingEls = slugs
+      .map((s) => document.getElementById(s))
+      .filter(Boolean) as HTMLElement[];
+
+    if (!headingEls.length) return;
+
+    let current = slugs[0];
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+
+        if (visible.length > 0) {
+          current = visible[0].target.id;
+          setActive(current);
+        }
+      },
+      { rootMargin: '-80px 0px -65% 0px', threshold: 0 },
+    );
+
+    headingEls.forEach((el) => observer.observe(el));
+    setActive(current);
+
+    // Smooth scroll on click
+    links.forEach((link) => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const slug = (link as HTMLElement).dataset.slug!;
+        const target = document.getElementById(slug);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          current = slug;
+          setActive(slug);
+          history.pushState(null, '', `#${slug}`);
+        }
+      });
+    });
+  }
+
+  initToc();
+  document.addEventListener('astro:after-swap', initToc);
+</script>

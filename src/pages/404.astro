@@ -1,0 +1,39 @@
+---
+import PageLayout from '@layouts/PageLayout.astro';
+---
+
+<PageLayout title="Not Found" description="The page you're looking for doesn't exist.">
+  <div class="flex flex-col items-center justify-center py-20 text-center">
+    <div class="relative mb-4">
+      <span
+        class="block text-[8rem] sm:text-[10rem] font-bold leading-none tabular-nums text-[var(--color-text-tertiary)] opacity-[0.07] select-none"
+        aria-hidden="true"
+      >
+        404
+      </span>
+      <div class="absolute inset-0 flex items-center justify-center">
+        <span class="gradient-text text-3xl sm:text-4xl font-bold">Lost in space</span>
+      </div>
+    </div>
+    <p class="max-w-sm text-pretty text-[var(--color-text-secondary)]">
+      This page took a wrong turn somewhere. It might have been moved, deleted,
+      or maybe it never existed.
+    </p>
+    <a
+      href="/"
+      class="group mt-8 inline-flex items-center gap-2 text-sm text-[var(--color-text-secondary)] transition-colors duration-200 hover:text-[var(--color-text)]"
+    >
+      <svg
+        class="size-4 transition-transform duration-200 group-hover:-translate-x-1"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+        aria-hidden="true"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+      </svg>
+      Back to home
+    </a>
+  </div>
+</PageLayout>

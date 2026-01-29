@@ -1,0 +1,275 @@
+---
+// Theme Picker — horizontal swatch strip with palette preview circles.
+// 3 light + 6 dark, separated by a divider.
+
+const checkPath = 'M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z';
+
+interface Swatch {
+  id: string;
+  label: string;
+  bg: string;
+  secondary: string;
+  accent: string;
+  border: string;
+  checkFill: string;
+}
+
+const light: Swatch[] = [
+  { id: 'paper',  label: 'Paper',  bg: '#ffffff', secondary: '#f7f7f5', accent: 'oklch(0.56 0.26 250)', border: 'rgba(0,0,0,0.08)', checkFill: '#1a1a1a' },
+  { id: 'dawn',   label: 'Dawn',   bg: '#faf4ed', secondary: '#f2e9de', accent: 'oklch(0.55 0.24 10)',  border: 'rgba(0,0,0,0.06)', checkFill: '#575279' },
+  { id: 'sakura', label: 'Sakura', bg: '#fef5f7', secondary: '#fcedf1', accent: 'oklch(0.55 0.24 350)', border: 'rgba(0,0,0,0.06)', checkFill: '#3d2832' },
+];
+
+const dark: Swatch[] = [
+  { id: 'night',    label: 'Night',  bg: '#09090b', secondary: '#131316', accent: 'oklch(0.60 0.26 250)', border: 'rgba(255,255,255,0.08)', checkFill: '#fafafa' },
+  { id: 'midnight', label: 'Mid',    bg: '#080c18', secondary: '#0e1528', accent: 'oklch(0.60 0.26 210)', border: 'rgba(100,180,255,0.1)',   checkFill: '#c9d5e8' },
+  { id: 'ember',    label: 'Ember',  bg: '#0f0b08', secondary: '#1a140e', accent: 'oklch(0.62 0.24 38)',  border: 'rgba(180,120,40,0.12)',   checkFill: '#ede0d0' },
+  { id: 'cosmos',   label: 'Cosmos', bg: '#0a0610', secondary: '#120e1c', accent: 'oklch(0.60 0.26 285)', border: 'rgba(120,60,200,0.12)',   checkFill: '#e8e0f8' },
+  { id: 'forest',   label: 'Forest', bg: '#070f0b', secondary: '#0e1a14', accent: 'oklch(0.58 0.22 155)', border: 'rgba(40,120,60,0.12)',    checkFill: '#c8e0d0' },
+  { id: 'noir',     label: 'Noir',   bg: '#050505', secondary: '#0e0e0e', accent: 'oklch(0.55 0.26 15)',  border: 'rgba(255,255,255,0.06)',  checkFill: '#f0f0f0' },
+];
+
+const allSwatches = [...light, ...dark];
+---
+
+<div class="relative" id="theme-picker-wrapper">
+  <button
+    id="theme-picker-btn"
+    class="theme-trigger inline-flex items-center justify-center p-2 transition-colors duration-200 hover:bg-[var(--color-bg-secondary)] outline-none focus-visible:ring-2 focus-visible:ring-accent-500"
+    style="border-radius: var(--radius-sm)"
+    aria-label="Change theme"
+    aria-haspopup="listbox"
+    aria-expanded="false"
+  >
+    <!-- Half-and-half sun/moon swatch icon -->
+    <svg class="size-5 text-[var(--color-text-secondary)] transition-colors duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+      <circle cx="12" cy="12" r="5" stroke="currentColor" fill="none" />
+      <path d="M12 7V2M12 22v-5M7 12H2M22 12h-5M8.46 8.46 4.93 4.93M19.07 19.07l-3.54-3.54M8.46 15.54l-3.53 3.53M19.07 4.93l-3.54 3.53" stroke="currentColor" stroke-linecap="round" />
+      <path d="M12 7a5 5 0 0 1 0 10" fill="currentColor" stroke="none" />
+    </svg>
+  </button>
+
+  <div
+    id="theme-picker-dropdown"
+    class="theme-panel absolute right-0 top-full mt-3 hidden border border-[var(--color-border)] bg-[var(--color-bg)]/95 px-3 py-3 shadow-xl backdrop-blur-xl"
+    style="border-radius: var(--radius-lg)"
+    role="listbox"
+    aria-label="Select theme"
+    tabindex="-1"
+  >
+    <div class="flex items-center gap-1.5">
+      {/* Light themes */}
+      {light.map((s) => (
+        <button role="option" data-theme-id={s.id} class="theme-swatch-btn group relative flex flex-col items-center gap-1.5 px-1.5 py-1 outline-none" style="border-radius: var(--radius-md)" aria-label={`${s.label} theme`}>
+          <span class="swatch-ring relative inline-flex size-8 items-center justify-center rounded-full transition-all duration-200" aria-hidden="true">
+            <span class="inline-block size-8 rounded-full" style={`background: ${s.bg}; box-shadow: inset 0 0 0 1px ${s.border}`}>
+              <span class="block size-full rounded-full overflow-hidden">
+                <span class="block h-1/2 w-full" style={`background: ${s.bg}`}></span>
+                <span class="flex h-1/2 w-full">
+                  <span class="w-1/2 h-full" style={`background: ${s.secondary}`}></span>
+                  <span class="w-1/2 h-full" style={`background: ${s.accent}`}></span>
+                </span>
+              </span>
+            </span>
+            <svg class="swatch-check absolute size-3.5 opacity-0 transition-opacity duration-150 drop-shadow-sm" viewBox="0 0 16 16" fill={s.checkFill}><path d={checkPath} /></svg>
+          </span>
+          <span class="swatch-label text-[9px] font-medium uppercase tracking-wider text-[var(--color-text-tertiary)] transition-colors duration-150">{s.label}</span>
+        </button>
+      ))}
+
+      {/* Divider */}
+      <span class="mx-0.5 h-6 w-px bg-[var(--color-border)]" aria-hidden="true"></span>
+
+      {/* Dark themes */}
+      {dark.map((s) => (
+        <button role="option" data-theme-id={s.id} class="theme-swatch-btn group relative flex flex-col items-center gap-1.5 px-1.5 py-1 outline-none" style="border-radius: var(--radius-md)" aria-label={`${s.label} theme`}>
+          <span class="swatch-ring relative inline-flex size-8 items-center justify-center rounded-full transition-all duration-200" aria-hidden="true">
+            <span class="inline-block size-8 rounded-full" style={`background: ${s.bg}; box-shadow: inset 0 0 0 1px ${s.border}`}>
+              <span class="block size-full rounded-full overflow-hidden">
+                <span class="block h-1/2 w-full" style={`background: ${s.bg}`}></span>
+                <span class="flex h-1/2 w-full">
+                  <span class="w-1/2 h-full" style={`background: ${s.secondary}`}></span>
+                  <span class="w-1/2 h-full" style={`background: ${s.accent}`}></span>
+                </span>
+              </span>
+            </span>
+            <svg class="swatch-check absolute size-3.5 opacity-0 transition-opacity duration-150 drop-shadow-sm" viewBox="0 0 16 16" fill={s.checkFill}><path d={checkPath} /></svg>
+          </span>
+          <span class="swatch-label text-[9px] font-medium uppercase tracking-wider text-[var(--color-text-tertiary)] transition-colors duration-150">{s.label}</span>
+        </button>
+      ))}
+    </div>
+  </div>
+</div>
+
+<style>
+  .theme-panel {
+    opacity: 0;
+    transform: scale(0.92) translateY(-6px);
+    transform-origin: top right;
+    transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+  }
+
+  .theme-panel.open {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    pointer-events: auto;
+  }
+
+  .theme-swatch-btn[aria-selected="true"] .swatch-ring {
+    box-shadow: 0 0 0 2px var(--color-bg), 0 0 0 3.5px var(--color-accent-500);
+    border-radius: 9999px;
+  }
+
+  .theme-swatch-btn[aria-selected="true"] .swatch-check {
+    opacity: 1;
+  }
+
+  .theme-swatch-btn[aria-selected="true"] .swatch-label {
+    color: var(--color-text);
+  }
+
+  .theme-swatch-btn:hover .swatch-ring {
+    transform: scale(1.12);
+  }
+
+  .theme-swatch-btn:active .swatch-ring {
+    transform: scale(0.95);
+    transition-duration: 100ms;
+  }
+
+  .theme-swatch-btn:focus-visible .swatch-ring {
+    box-shadow: 0 0 0 2px var(--color-bg), 0 0 0 3.5px var(--color-accent-500);
+    border-radius: 9999px;
+  }
+
+  .theme-trigger {
+    transition: transform 0.15s ease, background-color 0.2s ease;
+  }
+  .theme-trigger:active {
+    transform: scale(0.92);
+  }
+</style>
+
+<script>
+  const DARK_THEMES = ['night', 'midnight', 'ember', 'cosmos', 'forest', 'noir'];
+
+  const THEME_COLORS: Record<string, string> = {
+    paper: '#ffffff',
+    dawn: '#faf4ed',
+    sakura: '#fef5f7',
+    night: '#0a0a0a',
+    midnight: '#0b0e17',
+    ember: '#110d0a',
+    cosmos: '#0e0a12',
+    forest: '#070f0b',
+    noir: '#050505',
+  };
+
+  function applyTheme(themeId: string) {
+    const html = document.documentElement;
+    html.setAttribute('data-theme', themeId);
+
+    if (DARK_THEMES.includes(themeId)) {
+      html.classList.add('dark');
+    } else {
+      html.classList.remove('dark');
+    }
+
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', THEME_COLORS[themeId] ?? '#ffffff');
+    }
+
+    localStorage.setItem('theme', themeId);
+    markSelected(themeId);
+  }
+
+  function markSelected(themeId: string) {
+    document.querySelectorAll('.theme-swatch-btn').forEach((opt) => {
+      const isSelected = (opt as HTMLElement).dataset.themeId === themeId;
+      opt.setAttribute('aria-selected', String(isSelected));
+    });
+  }
+
+  function initThemePicker() {
+    const btn = document.getElementById('theme-picker-btn');
+    const dropdown = document.getElementById('theme-picker-dropdown');
+    const wrapper = document.getElementById('theme-picker-wrapper');
+    if (!btn || !dropdown || !wrapper) return;
+
+    function openDropdown() {
+      dropdown!.classList.remove('hidden');
+      void dropdown!.offsetHeight;
+      dropdown!.classList.add('open');
+      btn!.setAttribute('aria-expanded', 'true');
+      const currentTheme = document.documentElement.getAttribute('data-theme') ?? 'paper';
+      const currentOpt = dropdown!.querySelector(`[data-theme-id="${currentTheme}"]`) as HTMLElement;
+      currentOpt?.focus();
+    }
+
+    function closeDropdown() {
+      dropdown!.classList.remove('open');
+      btn!.setAttribute('aria-expanded', 'false');
+      setTimeout(() => {
+        if (!dropdown!.classList.contains('open')) {
+          dropdown!.classList.add('hidden');
+        }
+      }, 200);
+    }
+
+    btn.addEventListener('click', () => {
+      if (dropdown!.classList.contains('hidden') || !dropdown!.classList.contains('open')) {
+        openDropdown();
+      } else {
+        closeDropdown();
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!wrapper!.contains(e.target as Node)) {
+        closeDropdown();
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && dropdown!.classList.contains('open')) {
+        closeDropdown();
+        btn!.focus();
+      }
+    });
+
+    dropdown.querySelectorAll('.theme-swatch-btn').forEach((opt) => {
+      opt.addEventListener('click', () => {
+        const themeId = (opt as HTMLElement).dataset.themeId!;
+        applyTheme(themeId);
+        closeDropdown();
+        btn!.focus();
+      });
+    });
+
+    dropdown.addEventListener('keydown', (e) => {
+      const options = [...dropdown!.querySelectorAll('.theme-swatch-btn')] as HTMLElement[];
+      const current = document.activeElement as HTMLElement;
+      const idx = options.indexOf(current);
+
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        options[(idx + 1) % options.length]?.focus();
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        options[(idx - 1 + options.length) % options.length]?.focus();
+      } else if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        current?.click();
+      }
+    });
+
+    const currentTheme = document.documentElement.getAttribute('data-theme') ?? 'paper';
+    markSelected(currentTheme);
+  }
+
+  document.addEventListener('astro:page-load', initThemePicker);
+</script>

@@ -1,0 +1,47 @@
+---
+// Floating back-to-top button. Appears after scrolling past the first viewport.
+---
+
+<button
+  id="back-to-top"
+  class="fixed bottom-6 right-6 z-50 flex size-10 items-center justify-center border border-[var(--color-border)] bg-[var(--color-bg)]/90 text-[var(--color-text-secondary)] opacity-0 backdrop-blur-sm transition-all duration-300 hover:text-[var(--color-text)] hover:border-[var(--color-border-hover)] focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg)] outline-none pointer-events-none translate-y-4"
+  style="border-radius: var(--radius-md); box-shadow: var(--shadow-card)"
+  aria-label="Back to top"
+>
+  <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+  </svg>
+</button>
+
+<script>
+  function initBackToTop() {
+    const btn = document.getElementById('back-to-top');
+    if (!btn) return;
+
+    let visible = false;
+
+    function toggle() {
+      const shouldShow = window.scrollY > window.innerHeight;
+      if (shouldShow === visible) return;
+      visible = shouldShow;
+
+      if (shouldShow) {
+        btn.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+        btn.classList.add('opacity-100', 'pointer-events-auto', 'translate-y-0');
+      } else {
+        btn.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+        btn.classList.remove('opacity-100', 'pointer-events-auto', 'translate-y-0');
+      }
+    }
+
+    window.addEventListener('scroll', toggle, { passive: true });
+    toggle();
+
+    btn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  initBackToTop();
+  document.addEventListener('astro:after-swap', initBackToTop);
+</script>

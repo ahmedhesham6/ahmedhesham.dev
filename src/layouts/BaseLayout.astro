@@ -1,0 +1,90 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import BaseHead from '@components/BaseHead.astro';
+import Header from '@components/Header.astro';
+import Footer from '@components/Footer.astro';
+import BackToTop from '@components/BackToTop.astro';
+import ScrollReveal from '@components/ScrollReveal.astro';
+import '@/styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  article?: boolean;
+  publishedDate?: Date;
+  tags?: string[];
+}
+
+const { title, description, image, article, publishedDate, tags } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" data-theme="paper">
+  <head>
+    <BaseHead
+      title={title}
+      description={description}
+      image={image}
+      article={article}
+      publishedDate={publishedDate}
+      tags={tags}
+    />
+    <!-- Prevent FOUC: apply theme before paint -->
+    <script is:inline>
+      (function() {
+        var DARK = ['night','midnight','ember','cosmos','forest','noir'];
+        var VALID = ['paper','dawn','sakura','night','midnight','ember','cosmos','forest','noir'];
+        var COLORS = {
+          paper:'#ffffff', dawn:'#faf4ed', sakura:'#fef5f7',
+          night:'#0a0a0a', midnight:'#0b0e17', ember:'#110d0a',
+          cosmos:'#0e0a12', forest:'#070f0b', noir:'#050505'
+        };
+        var stored = typeof localStorage !== 'undefined' && localStorage.getItem('theme');
+        var theme;
+        if (stored && VALID.indexOf(stored) !== -1) {
+          theme = stored;
+        } else {
+          theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'night' : 'paper';
+        }
+        var d = document.documentElement;
+        d.setAttribute('data-theme', theme);
+        if (DARK.indexOf(theme) !== -1) {
+          d.classList.add('dark');
+        } else {
+          d.classList.remove('dark');
+        }
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) {
+          meta.setAttribute('content', COLORS[theme] || '#ffffff');
+          meta.removeAttribute('media');
+        }
+      })();
+    </script>
+    <!-- Preserve theme across View Transitions -->
+    <script is:inline>
+      document.addEventListener('astro:before-swap', function(e) {
+        var DARK = ['night','midnight','ember','cosmos','forest','noir'];
+        var theme = document.documentElement.getAttribute('data-theme');
+        if (theme && e.newDocument) {
+          e.newDocument.documentElement.setAttribute('data-theme', theme);
+          if (DARK.indexOf(theme) !== -1) {
+            e.newDocument.documentElement.classList.add('dark');
+          } else {
+            e.newDocument.documentElement.classList.remove('dark');
+          }
+        }
+      });
+    </script>
+    <ClientRouter />
+  </head>
+  <body class="min-h-dvh flex flex-col">
+    <Header />
+    <main class="flex-1" transition:animate="fade">
+      <slot />
+    </main>
+    <Footer />
+    <BackToTop />
+    <ScrollReveal />
+  </body>
+</html>

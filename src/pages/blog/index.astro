@@ -1,0 +1,39 @@
+---
+import PageLayout from '@layouts/PageLayout.astro';
+import BlogPostCard from '@components/BlogPostCard.astro';
+import Tag from '@components/Tag.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog'))
+  .filter((post) => !post.data.draft)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const allTags = [...new Set(posts.flatMap((post) => post.data.tags))];
+---
+
+<PageLayout title="Blog" description="All posts about software engineering, architecture, and developer tools.">
+  <div class="reveal">
+    <h1 class="text-3xl font-bold text-balance">Blog</h1>
+    <p class="mt-2 text-pretty text-[var(--color-text-secondary)]">
+      Writing about software engineering, architecture, and developer tools.
+    </p>
+  </div>
+
+  {allTags.length > 0 && (
+    <div class="reveal mt-6 flex flex-wrap gap-2" data-delay="100">
+      {allTags.map((tag) => (
+        <Tag tag={tag} />
+      ))}
+    </div>
+  )}
+
+  <div class="mt-10 flex flex-col gap-2">
+    {posts.map((post, i) => (
+      <div class="reveal" data-delay={String(50 + i * 40)}>
+        <BlogPostCard post={post} />
+      </div>
+    ))}
+  </div>
+
+
+</PageLayout>

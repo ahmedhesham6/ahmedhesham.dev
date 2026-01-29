@@ -1,0 +1,19 @@
+---
+interface Props {
+  tag: string;
+  linked?: boolean;
+}
+
+const { tag, linked = true } = Astro.props;
+const baseClass =
+  'inline-flex items-center border border-[var(--color-border)] px-3 py-1.5 text-xs text-[var(--color-text-secondary)] transition-all duration-200 hover:border-[var(--color-border-hover)] hover:text-[var(--color-text)] hover:bg-[var(--color-bg-secondary)]';
+const radiusStyle = 'border-radius: var(--radius-full)';
+---
+
+{linked ? (
+  <a href={`/blog/tags/${tag}`} class={baseClass} style={radiusStyle}>
+    {tag}
+  </a>
+) : (
+  <span class={baseClass} style={radiusStyle}>{tag}</span>
+)}
