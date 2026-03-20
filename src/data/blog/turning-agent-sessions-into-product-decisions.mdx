@@ -39,7 +39,11 @@ And the agent **self-directs**. It follows leads. It decides what to drill into.
 
 ## How I built the pipeline
 
-The architecture is Langfuse → S3 → OpenViking. Extract sessions, stage them, load them. OpenViking handles the rest — L0/L1 generation, embedding, memory extraction.
+The architecture is Langfuse → S3 → OpenViking. Extract sessions, stage them, load them. OpenViking handles the rest.
+
+import PipelineDiagram from '@components/mdx/PipelineDiagram.astro';
+
+<PipelineDiagram />
 
 I split it into two stages for a reason:
 
