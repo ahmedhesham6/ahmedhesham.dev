@@ -9,7 +9,7 @@ At [Stakpak](https://stakpak.dev) we build a DevOps AI agent. Users talk to it l
 
 After a few months we had thousands of these sessions. Each one captures the shape of a conversation — around 100K tokens of interaction patterns, tool usage sequences, and outcome signals.
 
-Somewhere in that data was everything we needed: what users are trying to do, where they get stuck, what we should build next. The problem was we had no way to ask.
+Somewhere in that data was everything we needed: where the agent fails, what tasks it struggles with, which tool chains break most often. The problem was we had no way to ask.
 
 ## The brute-force approach is dead on arrival
 
@@ -97,15 +97,15 @@ We built this the way we'd want our own sessions handled.
 
 ## Now we can actually ask questions
 
-This is the part that matters. Thousands of sessions, indexed and searchable. For the first time, we can explore instead of guess.
+This is the part that matters. Thousands of sessions, indexed and searchable. For the first time, we can interrogate agent behavior at scale instead of guessing.
 
-**What are users doing?** A semantic search for "deployment" pulls up sessions across Kubernetes, Terraform, Docker Compose, Salesforce. We see which platforms dominate and where users spend the most turns — which is usually where things are hardest.
+**Where does the agent fail?** Searching for "error timeout retry failed" surfaces every session where the agent hit a wall. L1 overviews tell us whether it was a hallucinated command, a tool timeout, a permission issue, or a broken chain of reasoning. We categorize failure modes across the entire corpus without reading a single full transcript.
 
-**Where do they fail?** "Error timeout gave up" surfaces the sessions where things broke. L1 overviews tell us whether it was the agent's fault, a tool issue, or the user's environment. We categorize failure modes across the entire corpus without reading a single full transcript.
+**What tasks does the agent struggle with?** A semantic search for "deployment" pulls up sessions across Kubernetes, Terraform, Docker Compose, Salesforce. We can see which DevOps tasks take the most turns to complete — and which ones the agent gives up on. Multi-step Terraform plans with conditional logic? The agent chokes. Simple rollbacks? Nailed every time.
 
-**What should we build?** When users repeatedly work around a missing capability — manually doing something the agent should handle — that pattern emerges. OpenViking's memory extraction captures these as queryable "preference" and "event" records.
+**What capabilities are missing?** When the agent repeatedly falls back to asking for help — or produces a plan but can't execute it — that pattern shows up. OpenViking's memory extraction captures these as queryable "event" records. We can see exactly where the agent's tool chain has gaps.
 
-**How do use cases compare?** Extracted memories organize into entities, events, and preferences. Projects, tools, platforms. Deployments, migrations, debugging. How users want things done. It's a structured map of our user base that no analytics dashboard could produce.
+**How do failure modes compare across platforms?** Extracted memories organize into entities, events, and outcomes. Kubernetes sessions have different failure signatures than Terraform sessions. Docker Compose rarely fails, but when it does it's always networking. These patterns give us a structured map of agent weaknesses that no error dashboard could produce.
 
 The data was always there. We just couldn't afford to read it — until now.
 
@@ -125,10 +125,10 @@ The ETL is plain Python. `httpx` for APIs, `boto3` for S3, no framework. Retry l
 
 ## What's next
 
-The indexed sessions are the foundation. Next: automated analysis agents that run weekly — scanning for quality regressions, cost anomalies, emerging use cases, safety issues. Each run produces a report that feeds directly into what we build.
+The indexed sessions are the foundation. Next: automated analysis agents that run weekly — scanning for quality regressions, new failure patterns, cost anomalies, and capability gaps. Each run produces a report that feeds directly into what we build.
 
-The insight was never in any single session. It's in the patterns across thousands of them. The hard part was making those patterns cheap enough to explore.
+The insight was never in any single session. It's in the patterns across thousands of them — the failure modes that repeat, the tool chains that break, the tasks that take too many turns. The hard part was making those patterns cheap enough to explore.
 
-If you're sitting on a pile of agent sessions and wondering what your users actually need — index everything, let agents explore, follow the data.
+If you're building an AI agent and wondering why it fails at certain tasks — index everything, let agents analyze agents, and follow the data.
 
 We're building [Stakpak](https://stakpak.dev). If you're working on something similar, find me on [X](https://x.com/AhmedEtcho) or [LinkedIn](https://www.linkedin.com/in/ahmedhesham6/).
