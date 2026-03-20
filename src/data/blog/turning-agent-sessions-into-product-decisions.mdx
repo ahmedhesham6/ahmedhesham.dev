@@ -1,6 +1,6 @@
 ---
 title: 'Turning Agent Sessions into Product Decisions'
-description: 'How we indexed hundreds of millions of tokens of AI agent conversations for under $30, and built a system that lets us ask real product questions for a few dollars per run.'
+description: 'How we indexed hundreds of millions of tokens of AI agent conversations and built a system that lets us ask real product questions for a few dollars per run.'
 pubDate: 2026-03-20
 tags: ['ai', 'agents', 'data-engineering', 'observability', 'product']
 ---
@@ -117,7 +117,7 @@ The data was always there. We just couldn't afford to read it — until now.
 
 The ETL is plain Python. `httpx` for APIs, `boto3` for S3, no framework. Retry logic with exponential backoff. The transform handles OTEL GenAI message format with safe JSON parsing.
 
-**Initial load: under $30. Daily updates: a few dollars a month. Each analysis run: $5–15.**
+**Daily updates and analysis runs cost a few dollars each.**
 
 ## What's next
 
