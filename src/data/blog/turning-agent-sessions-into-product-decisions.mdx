@@ -1,0 +1,130 @@
+---
+title: 'Turning Agent Sessions into Product Decisions'
+description: 'How we indexed hundreds of millions of tokens of AI agent conversations for under $30, and built a system that lets us ask real product questions for a few dollars per run.'
+pubDate: 2026-03-20
+tags: ['ai', 'agents', 'data-engineering', 'observability', 'product']
+---
+
+At [Stakpak](https://stakpak.dev) we build a DevOps AI agent. Users talk to it like a colleague — "deploy this to staging," "why is this pod crashing," "write me a Terraform module for our new service." Like any AI product, we track anonymized usage patterns and session metadata through [Langfuse](https://langfuse.com) to understand how the agent performs — what actions it takes, where it errors, how conversations flow.
+
+After a few months we had thousands of these sessions. Each one captures the shape of a conversation — around 100K tokens of interaction patterns, tool usage sequences, and outcome signals.
+
+Somewhere in that data was everything we needed: what users are trying to do, where they get stuck, what we should build next. The problem was we had no way to ask.
+
+## The brute-force approach is dead on arrival
+
+Thousands of sessions at ~100K tokens each. That's **hundreds of millions of tokens**. You can't feed that to an LLM. You can try batching — split it into a hundred-something groups of 50 — but that runs close to $2,000 per pass. And that's before you realize batching doesn't even work for this kind of analysis.
+
+Here's why. An agent analyzing batched sessions only sees what's in front of it. It can't follow a lead. It notices an error pattern in batch 14 but has no way to check whether the same thing happened in batch 87. You're forced to pre-filter, which means you need to already know what you're looking for.
+
+That defeats the entire point.
+
+What we needed was something that lets an analysis agent **scan everything cheaply**, then **drill into what matters** — on its own, following its own leads.
+
+## OpenViking changed the math
+
+[OpenViking](https://github.com/volcengine/OpenViking) is a context database from ByteDance (Volcengine), released in early 2026. The idea is simple and it works: for every piece of content you store, it automatically generates three tiers of representation.
+
+| Level | What it is | Size | Used for |
+|-------|-----------|------|---------|
+| **L0** | One-sentence abstract | ~100 tokens | Semantic search across everything |
+| **L1** | Structured overview | ~2K tokens | Understanding what happened without the full transcript |
+| **L2** | Original content | Full session | Hard evidence when you need it |
+
+Think about what this means for analysis. An agent scans all the L0 abstracts — a few hundred thousand tokens. Finds a few hundred semantic matches. Reads those L1 overviews — another few hundred thousand tokens. Narrows it down to the sessions that actually matter. Pulls up a handful of full transcripts for evidence.
+
+**Under 2M tokens. A few dollars.** The same analysis that would cost $2,000 with brute force.
+
+And the agent **self-directs**. It follows leads. It decides what to drill into. We don't pre-filter, we don't guess — we just let it explore.
+
+## How I built the pipeline
+
+The architecture is Langfuse → S3 → OpenViking. Extract sessions, stage them, load them. OpenViking handles the rest — L0/L1 generation, embedding, memory extraction.
+
+I split it into two stages for a reason:
+
+**Extract** pulls sessions from Langfuse by date, converts them from [OTEL GenAI semantic format](https://opentelemetry.io/docs/specs/semconv/gen-ai/) to OpenViking's message schema, and writes each one to S3. This parallelizes cleanly — just API calls and S3 writes.
+
+**Load** reads from S3 and pushes into OpenViking: create session, add messages, commit. This runs sequentially because each commit triggers async processing — L0/L1 generation, vectorization, memory extraction.
+
+The split gives me resilience. OpenViking down? Extract still finishes. Need to reload a day? Data's in S3. Something fails mid-load? Each date has its own manifest, so I know exactly what succeeded.
+
+For scheduling I use [Dagu](https://github.com/dagu-org/dagu) — a single Go binary, web dashboard, no Postgres or Redis. The entire daily workflow is one YAML file:
+
+```yaml
+# etl-daily.yaml
+schedule: "0 4 * * *"
+steps:
+  - name: extract
+    command: uv run python -m flows.pipeline extract
+  - name: load
+    command: uv run python -m flows.pipeline load
+```
+
+Runs at 4am UTC. For a pipeline this size, Airflow or Temporal would be absurd.
+
+## Everything runs on one box
+
+The whole stack — OpenViking, Caddy for TLS, Dagu — lives on a single EC2 `t3.medium`. Two vCPUs, 4GB RAM, 256GB gp3 storage. Under $100/month.
+
+Some hard-won lessons:
+
+**VLM concurrency will murder a small instance.** OpenViking's defaults assume beefy hardware. On my t3.medium, the default concurrency during commits ate all memory and killed the process. Setting `max_concurrent: 2` fixed it instantly. Pipeline has been rock solid since.
+
+**There's no upsert.** OpenViking generates a new internal UUID per session regardless of your external ID. I handle idempotency at S3 — one file per session ID per date. Simple and bulletproof.
+
+**I found and fixed a bug in OpenViking itself.** Each account backend was spinning up its own RocksDB instance on the same storage path — permanent lock contention. One-liner fix: share a single adapter across backends.
+
+```python
+# Before: every backend fights for the same RocksDB lock
+self._adapter = create_collection_adapter(config)
+
+# After: share one adapter, no contention
+self._adapter = shared_adapter or create_collection_adapter(config)
+```
+
+Patched it locally via Docker volume mount and [submitted it upstream](https://github.com/volcengine/OpenViking/pull/777).
+
+## We take privacy seriously
+
+Stakpak already strips secrets and credentials client-side — API keys, cloud account IDs, and common secret patterns never leave the user's machine. On top of that, the ETL layer strips remaining PII before anything touches OpenViking. OpenViking itself runs on a private instance behind TLS, no public endpoint, encrypted S3 with least-privilege IAM. Staging expires after 30 days, backups after 90.
+
+We built this the way we'd want our own sessions handled.
+
+## Now we can actually ask questions
+
+This is the part that matters. Thousands of sessions, indexed and searchable. For the first time, we can explore instead of guess.
+
+**What are users doing?** A semantic search for "deployment" pulls up sessions across Kubernetes, Terraform, Docker Compose, Salesforce. We see which platforms dominate and where users spend the most turns — which is usually where things are hardest.
+
+**Where do they fail?** "Error timeout gave up" surfaces the sessions where things broke. L1 overviews tell us whether it was the agent's fault, a tool issue, or the user's environment. We categorize failure modes across the entire corpus without reading a single full transcript.
+
+**What should we build?** When users repeatedly work around a missing capability — manually doing something the agent should handle — that pattern emerges. OpenViking's memory extraction captures these as queryable "preference" and "event" records.
+
+**How do use cases compare?** Extracted memories organize into entities, events, and preferences. Projects, tools, platforms. Deployments, migrations, debugging. How users want things done. It's a structured map of our user base that no analytics dashboard could produce.
+
+The data was always there. We just couldn't afford to read it — until now.
+
+## The stack
+
+| Component | What it does |
+|-----------|-------------|
+| **[Langfuse](https://langfuse.com)** | Session tracking — source of truth |
+| **[OpenViking](https://github.com/volcengine/OpenViking)** | Tiered context storage + semantic search |
+| **S3** | ETL staging + backups |
+| **[Dagu](https://github.com/dagu-org/dagu)** | Workflow scheduling — single binary, one YAML |
+| **EC2 t3.medium** | Runs everything |
+
+The ETL is plain Python. `httpx` for APIs, `boto3` for S3, no framework. Retry logic with exponential backoff. The transform handles OTEL GenAI message format with safe JSON parsing.
+
+**Initial load: under $30. Daily updates: a few dollars a month. Each analysis run: $5–15.**
+
+## What's next
+
+The indexed sessions are the foundation. Next: automated analysis agents that run weekly — scanning for quality regressions, cost anomalies, emerging use cases, safety issues. Each run produces a report that feeds directly into what we build.
+
+The insight was never in any single session. It's in the patterns across thousands of them. The hard part was making those patterns cheap enough to explore.
+
+If you're sitting on a pile of agent sessions and wondering what your users actually need — index everything, let agents explore, follow the data.
+
+We're building [Stakpak](https://stakpak.dev). If you're working on something similar, find me on [X](https://x.com/AhmedEtcho) or [LinkedIn](https://www.linkedin.com/in/ahmedhesham6/).
